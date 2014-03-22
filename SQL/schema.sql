@@ -1,6 +1,6 @@
-CREATE DATABASE messagedb;
+CREATE DATABASE myFunTime;
 
-USE messagedb;
+USE myFunTime;
 
 
 
@@ -45,9 +45,9 @@ USE messagedb;
 DROP TABLE IF EXISTS `messages`;
 
 CREATE TABLE `messages` (
-  INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  `username` TEXT(255) DEFAULT NULL,
-  `message` TEXT(255) DEFAULT NULL
+  `username` TEXT(255) DEFAULT PRIMARY KEY,
+  `message` TEXT(255) DEFAULT NULL,
+  `roomname` TEXT(255) DEFAULT NULL,
 );
 
 -- -- ---

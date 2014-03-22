@@ -14,7 +14,7 @@ describe("Persistent Node Chat Server", function() {
       user: "root",
     /* and password. */
       password: "",
-      database: "Chat"
+      database: "chat"
     });
     dbConnection.connect();
 
@@ -33,17 +33,15 @@ describe("Persistent Node Chat Server", function() {
     // Post a message to the node chat server:
     request({method: "POST",
              uri: "http://127.0.0.1:3000/send",
-             form: {username: "303",
+             form: {username: "Valjean",
                     message: "In mercy's name, three days is all I need."}
             },
             function(error, response, body) {
               /* Now if we look in the database, we should find the
                * posted message there. */
 
-               console.log("HEEEEYYY!");
-
               var queryString = "INSERT into messages";
-              var queryArgs = [1,"In mercy's name, three days is all I need.", "303",100];
+              var queryArgs = ["Valjean", "In mercy's name, three days is all I need."];
               /* TODO: Change the above queryString & queryArgs to match your schema design
                * The exact query string and query args to use
                * here depend on the schema you design, so I'll leave
@@ -75,7 +73,7 @@ describe("Persistent Node Chat Server", function() {
       function(err, results, fields) {
         /* Now query the Node chat server and see if it returns
          * the message we just inserted: */
-        request("http://127.0.0.1:8080/classes/room1",
+        request("http://127.0.0.1:3000/log",
           function(error, response, body) {
             var messageLog = JSON.parse(body);
             expect(messageLog[0].username).to.equal("Javert");

@@ -8,17 +8,11 @@ var url = require("url");
 var dbConnection = mysql.createConnection({
   user: "root",
   password: "",
-  database: "Chat"
+  database: "chat"
 });
 
 dbConnection.connect();
 
-dbConnection.query("SELECT * from messages", function(err, rows, fields){
-  console.log("ROWS: " + JSON.stringify(rows));
-  console.log("FIELDS: "+ JSON.stringify(fields));
-});
-
-dbConnection.end();
 /* Now you can make queries to the Mysql database using the
  * dbConnection.query() method.
  * See https://github.com/felixge/node-mysql for more details about
@@ -48,3 +42,5 @@ var router = function(req, res) {
 var server = http.createServer(router);
 console.log("Listening on http://" + ip + ":" + port);
 server.listen(port, ip);
+
+dbConnection.end();

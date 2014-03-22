@@ -1,6 +1,8 @@
 var server = require("./persistent_server.js");
 var http = require("http");
 var url = require("url");
+var mysql = require("mysql");
+
 
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
@@ -10,11 +12,43 @@ var defaultCorsHeaders = {
   "content-type": "application/json"
 };
 
+var dbConnection = mysql.createConnection({
+  user: "root",
+  password: "",
+  database: "chat"
+});
+
+var writeToDb = function(data){
+  //dbConnection.connect();
+    data.message = data.text;
+    delete data.text;
+  console.log(data);
+  dbConnection.query("INSERT into messages SET ?", data, function(err, results){
+    console.log("results",results);
+    //dbConnection.end();
+    return results;
+  });
+};
+
+var readFromDb = function(req, res){
+
+  dbConnection.query("SELECT * from messages", function(err, rows, fields){
+    console.log("======== ROWS ========");
+    console.log(rows);
+    getMessages(req, res, rows);
+  });
+};
+
+
+
 var sendResponse = function(res, obj, statusCode) {
   var statusCode = statusCode || 200;
   res.writeHead(statusCode, defaultCorsHeaders);
+  //console.log("THIS. IS. OBJECT.");
+  //console.log(obj);
   res.end(JSON.stringify(obj));
 };
+
 
 var collectData = function(req, callback) {
   var body = "";
@@ -27,14 +61,21 @@ var collectData = function(req, callback) {
   });
 };
 
-var getMessages = function(req, res) {
-  sendResponse(res, server.data, 200);
+
+var getMessages = function(req, res, data) {
+  for (var i = 0; i < data.length; i++) {
+    data[i].text = data[i].message;
+  }
+  var wrapper = {results: data};
+  sendResponse(res, wrapper, 200);
 };
 
 var sendMessages = function(req, res) {
   collectData(req, function(data) {
     var message = JSON.parse(data);
-    server.data.results.unshift(message);
+    console.log("------ Incoming!!M!ess!age! -------");
+    console.log(message);
+    writeToDb(message);
   });
   sendResponse(res, null, 201);
 };
@@ -44,7 +85,7 @@ var options = function(req, res) {
 };
 
 var actions = {
-  "GET": getMessages,
+  "GET": readFromDb,
   "POST": sendMessages,
   "OPTIONS": options
 };
