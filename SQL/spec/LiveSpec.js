@@ -3,6 +3,7 @@
 
 var mysql = require('mysql');
 var request = require("request"); // You might need to npm install the request module!
+var expect = require('../../node_modules/chai/chai').expect;
 
 describe("Persistent Node Chat Server", function() {
   var dbConnection;
@@ -50,9 +51,9 @@ describe("Persistent Node Chat Server", function() {
               dbConnection.query( queryString, queryArgs,
                 function(err, results, fields) {
                   // Should have one result:
-                  expect(results.length).toEqual(1);
-                  expect(results[0].user).toEqual("303");
-                  expect(results[0].text).toEqual("In mercy's name, three days is all I need.");
+                  expect(results.length).to.equal(1);
+                  expect(results[0].username).to.equal("Valjean");
+                  expect(results[0].message).to.equal("In mercy's name, three days is all I need.");
                   /* TODO: You will need to change these tests if the
                    * column names in your schema are different from
                    * mine! */
@@ -77,8 +78,8 @@ describe("Persistent Node Chat Server", function() {
         request("http://127.0.0.1:8080/classes/room1",
           function(error, response, body) {
             var messageLog = JSON.parse(body);
-            expect(messageLog[0].username).toEqual("Javert");
-            expect(messageLog[0].message).toEqual("Men like you can never change!");
+            expect(messageLog[0].username).to.equal("Javert");
+            expect(messageLog[0].message).to.equal("Men like you can never change!");
             done();
           });
       });
