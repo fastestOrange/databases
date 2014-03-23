@@ -2,6 +2,8 @@ var server = require("./persistent_server.js");
 var http = require("http");
 var url = require("url");
 var mysql = require("mysql");
+var Sequelize = require("sequelize");
+var sequelize = new Sequelize("newchat", "root", "");
 
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
@@ -11,53 +13,46 @@ var defaultCorsHeaders = {
   "content-type": "application/json"
 };
 
-// var dbConnection = mysql.createConnection({
-//   user: "root",
-//   password: "",
-//   database: "chat"
-// });
-//
+
+var Message = sequelize.define('Message', {
+  username: Sequelize.STRING,
+  message: Sequelize.STRING,
+  roomname: Sequelize.STRING
+},{
+  tablename:'messages'
+});
+
+Message.sync();
 
 var writeToDb = function(data){
-  //dbConnection.connect();
-    data.message = data.text;
-    delete data.text;
-    console.log(data);
-    User
-    .create({
-      username: data.username,
-      message: data.message,
-      roomname: data.roomname
-    })
-    .complete(function(err, results){
-      console.log("results",results);
-    //dbConnection.end();
-      return results;
-    });
-    // dbConnection.query("INSERT into messages SET ?", data, function(err, results){
-    // console.log("results",results);
-    // //dbConnection.end();
-    // return results;
-  // });
-  };
-
-var readFromDb = function(req, res){
-  User
-  .find({})
-  dbConnection.query("SELECT * from messages", function(err, rows, fields){
-    console.log("======== ROWS ========");
-    console.log(rows);
-    getMessages(req, res, rows);
+  data.message = data.text;
+  delete data.text;
+  console.log(data);
+  Message
+  .create({
+    username: data.username,
+    message: data.message,
+    roomname: data.roomname
+  })
+  .complete(function(err, results){
+    console.log("results",results);
+    return results;
   });
 };
 
-
+var readFromDb = function(req, res){
+  Message.findAll().success(function(messages) {
+    getMessages(req, res, messages);
+  });
+};
 
 var sendResponse = function(res, obj, statusCode) {
   var statusCode = statusCode || 200;
   res.writeHead(statusCode, defaultCorsHeaders);
-  //console.log("THIS. IS. OBJECT.");
-  //console.log(obj);
+  if (obj) {
+    console.log("THIS. IS. OBJECT.");
+    console.log(obj.results);
+  }
   res.end(JSON.stringify(obj));
 };
 
@@ -75,10 +70,14 @@ var collectData = function(req, callback) {
 
 
 var getMessages = function(req, res, data) {
-  for (var i = 0; i < data.length; i++) {
-    data[i].text = data[i].message;
+  var results = [];
+  for(var j = 0; j < data.length; j++){
+    results.push(data[j].dataValues);
   }
-  var wrapper = {results: data};
+  for (var i = 0; i < results.length; i++) {
+    results[i].text = results[i].message;
+  }
+  var wrapper = {results: results};
   sendResponse(res, wrapper, 200);
 };
 
